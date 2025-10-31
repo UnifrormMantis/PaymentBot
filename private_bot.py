@@ -256,7 +256,8 @@ class PrivatePaymentBot:
             """
             
             keyboard = [
-                [InlineKeyboardButton("➕ Добавить кошелек", callback_data="add_wallet")]
+                [InlineKeyboardButton("➕ Добавить кошелек", callback_data="add_wallet")],
+                [InlineKeyboardButton("🔙 Главное меню", callback_data="main_menu")]
             ]
         else:
             wallet_text = f"""
@@ -275,6 +276,7 @@ class PrivatePaymentBot:
                 keyboard.append([InlineKeyboardButton(button_text, callback_data=callback_data)])
             
             keyboard.append([InlineKeyboardButton("➕ Добавить кошелек", callback_data="add_wallet")])
+            keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data="main_menu")])
         
         reply_markup = InlineKeyboardMarkup(keyboard)
         
@@ -1140,6 +1142,7 @@ const response = await fetch('http://localhost:8001/create-payment', {
         
         keyboard.append([InlineKeyboardButton("🗑️ Удалить кошелек", callback_data=f"wallet_action_delete_{wallet_id}")])
         keyboard.append([InlineKeyboardButton("🔙 Назад к списку", callback_data="wallet_back")])
+        keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data="main_menu")])
         
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text(wallet_text, reply_markup=reply_markup, parse_mode='Markdown')
@@ -1160,16 +1163,18 @@ const response = await fetch('http://localhost:8001/create-payment', {
         if action == "activate":
             # Активируем кошелек
             self.db.set_active_wallet(user_id, wallet_id)
-            await query.edit_message_text("✅ Кошелек активирован!")
+            await query.answer("✅ Кошелек активирован!", show_alert=False)
+            # Сразу показываем обновленный список
+            await self.show_wallet_management(update, context)
             
         elif action == "delete":
             # Удаляем кошелек
             self.db.delete_user_wallet(user_id, wallet_id)
-            await query.edit_message_text("🗑️ Кошелек удален!")
-        
-        # Возвращаемся к списку кошельков
-        await asyncio.sleep(1)
-        await self.show_wallet_management(update, context)
+            await query.answer("🗑️ Кошелек удален!", show_alert=False)
+            # Сразу показываем обновленный список
+            await self.show_wallet_management(update, context)
+        else:
+            await query.answer("❌ Неизвестное действие", show_alert=False)
     
     async def wallet_back_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Обработчик кнопки 'Назад к списку'"""
