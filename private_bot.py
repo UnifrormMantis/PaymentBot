@@ -534,7 +534,7 @@ class PrivatePaymentBot:
         user_id = update.effective_user.id
         
         # Проверяем, является ли пользователь админом
-        if user_id not in [123456789]:  # Замените на ID администраторов
+        if user_id not in [8489431460]:  # ID администраторов
             await update.message.reply_text("❌ У вас нет прав для выполнения этой команды.")
             return
         
@@ -564,7 +564,7 @@ class PrivatePaymentBot:
         user_id = update.effective_user.id
         
         # Проверяем, является ли пользователь админом
-        if user_id not in [123456789]:  # Замените на ID администраторов
+        if user_id not in [8489431460]:  # ID администраторов
             await update.message.reply_text("❌ У вас нет прав для выполнения этой команды.")
             return
         
@@ -594,7 +594,7 @@ class PrivatePaymentBot:
         user_id = update.effective_user.id
         
         # Проверяем, является ли пользователь админом
-        if user_id not in [123456789]:  # Замените на ID администраторов
+        if user_id not in [8489431460]:  # ID администраторов
             await update.message.reply_text("❌ У вас нет прав для выполнения этой команды.")
             return
         
