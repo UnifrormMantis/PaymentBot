@@ -1194,7 +1194,11 @@ const response = await fetch('http://localhost:8001/create-payment', {
         if not await self.check_access(update, context):
             return
         
-        await self.show_wallet_management(update, context)
+        try:
+            await self.show_wallet_management(update, context)
+        except Exception as e:
+            logger.error(f"Ошибка в wallet_back_callback: {e}")
+            await query.answer("❌ Ошибка", show_alert=True)
     
     async def main_menu_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Обработчик кнопки 'Главное меню'"""
@@ -1204,8 +1208,12 @@ const response = await fetch('http://localhost:8001/create-payment', {
         if not await self.check_access(update, context):
             return
         
-        # Показываем главное меню через callback
-        await self.show_main_menu_callback(update, context)
+        try:
+            # Показываем главное меню через callback
+            await self.show_main_menu_callback(update, context)
+        except Exception as e:
+            logger.error(f"Ошибка в main_menu_callback: {e}")
+            await query.answer("❌ Ошибка", show_alert=True)
     
     async def show_main_menu_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Показать главное меню через callback"""
