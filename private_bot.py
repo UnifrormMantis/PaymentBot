@@ -1155,26 +1155,36 @@ const response = await fetch('http://localhost:8001/create-payment', {
         if not await self.check_access(update, context):
             return
         
-        user_id = query.from_user.id
-        parts = query.data.split('_')
-        action = parts[2]
-        wallet_id = int(parts[3])
-        
-        if action == "activate":
-            # Активируем кошелек
-            self.db.set_active_wallet(user_id, wallet_id)
-            await query.answer("✅ Кошелек активирован!", show_alert=False)
-            # Сразу показываем обновленный список
-            await self.show_wallet_management(update, context)
+        try:
+            user_id = query.from_user.id
+            parts = query.data.split('_')
+            if len(parts) < 4:
+                logger.error(f"Неверный формат callback_data: {query.data}")
+                await query.answer("❌ Ошибка обработки", show_alert=True)
+                return
             
-        elif action == "delete":
-            # Удаляем кошелек
-            self.db.delete_user_wallet(user_id, wallet_id)
-            await query.answer("🗑️ Кошелек удален!", show_alert=False)
-            # Сразу показываем обновленный список
-            await self.show_wallet_management(update, context)
-        else:
-            await query.answer("❌ Неизвестное действие", show_alert=False)
+            action = parts[2]
+            wallet_id = int(parts[3])
+        
+            if action == "activate":
+                # Активируем кошелек
+                self.db.set_active_wallet(user_id, wallet_id)
+                await query.answer("✅ Кошелек активирован!", show_alert=False)
+                # Сразу показываем обновленный список
+                await self.show_wallet_management(update, context)
+                
+            elif action == "delete":
+                # Удаляем кошелек
+                self.db.delete_user_wallet(user_id, wallet_id)
+                await query.answer("🗑️ Кошелек удален!", show_alert=False)
+                # Сразу показываем обновленный список
+                await self.show_wallet_management(update, context)
+            else:
+                await query.answer("❌ Неизвестное действие", show_alert=False)
+                logger.warning(f"Неизвестное действие: {action} для wallet_id={wallet_id}")
+        except Exception as e:
+            logger.error(f"Ошибка в wallet_action_callback: {e}, callback_data: {query.data}")
+            await query.answer("❌ Ошибка обработки действия", show_alert=True)
     
     async def wallet_back_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Обработчик кнопки 'Назад к списку'"""
@@ -1339,11 +1349,11 @@ const response = await fetch('http://localhost:8001/create-payment', {
         self.application.add_handler(CallbackQueryHandler(self.check_balance_callback, pattern="^check_balance$"))
         self.application.add_handler(CallbackQueryHandler(self.show_help_callback, pattern="^show_help$"))
         
-        # Обработчики управления кошельками
-        self.application.add_handler(CallbackQueryHandler(self.wallet_management_callback, pattern="^wallet_"))
+        # Обработчики управления кошельками (ВАЖНО: порядок! Сначала специфичные, потом общие)
         self.application.add_handler(CallbackQueryHandler(self.wallet_action_callback, pattern="^wallet_action_"))
         self.application.add_handler(CallbackQueryHandler(self.wallet_back_callback, pattern="^wallet_back$"))
         self.application.add_handler(CallbackQueryHandler(self.wallet_management_callback, pattern="^wallet_management$"))
+        self.application.add_handler(CallbackQueryHandler(self.wallet_management_callback, pattern="^wallet_"))
         
         # Обработчик главного меню
         self.application.add_handler(CallbackQueryHandler(self.main_menu_callback, pattern="^main_menu$"))
