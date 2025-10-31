@@ -1,0 +1,14 @@
+# Telegram Bot Configuration
+TELEGRAM_BOT_TOKEN=your_bot_token_here
+
+# Tron Configuration
+TRON_API_URL=https://api.trongrid.io
+TRON_API_KEY=your_tron_api_key_here
+
+# Database
+DATABASE_URL=sqlite:///payments.db
+
+# Bot Configuration
+CHECK_INTERVAL=30  # seconds
+CONFIRMATION_BLOCKS=3  # number of confirmations required
+
